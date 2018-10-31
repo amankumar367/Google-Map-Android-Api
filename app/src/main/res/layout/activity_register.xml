@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    tools:context=".RegisterActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,54 +19,38 @@
             android:layout_marginBottom="20dp"
             android:fontFamily="@font/audiowide"
             android:gravity="center"
-            android:text="LOGIN"
+            android:text="Register"
             android:textColor="#FF8F00"
             android:textStyle="bold"
             android:textSize="40dp"/>
 
         <EditText
-            android:id="@+id/email"
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:hint="Name" />
+
+        <EditText
+            android:id="@+id/regEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
             android:hint="Email" />
 
         <EditText
-            android:id="@+id/password"
+            android:id="@+id/regPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberPassword"
             android:hint="Password"/>
 
         <Button
-            android:id="@+id/loginButton"
+            android:id="@+id/regButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="30dp"
-            android:text="Login"/>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="2"
-            android:orientation="horizontal"
-            android:layout_marginTop="20dp"
-            android:layout_gravity="center">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Don't Have Account ?"
-                android:textColorLink="@android:color/background_dark" />
-            <Button
-                android:id="@+id/register_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Click Here"
-                android:textStyle="bold"
-                android:textColor="@color/colorPrimaryDark"
-                style="@style/Widget.AppCompat.Button.Borderless"/>
-        </LinearLayout>
+            android:text="Submit"/>
 
     </LinearLayout>
 

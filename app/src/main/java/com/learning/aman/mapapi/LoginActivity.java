@@ -23,7 +23,7 @@ import java.util.PriorityQueue;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText mEmail, mPassword;
-    private Button mLogin;
+    private Button mLogin, mRegister;
 
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
@@ -35,9 +35,15 @@ public class LoginActivity extends AppCompatActivity {
 
         mEmail = findViewById(R.id.email);
         mPassword =  findViewById(R.id.password);
-
-
         mLogin = (Button) findViewById(R.id.loginButton);
+        mRegister = (Button) findViewById(R.id.register_button);
+
+        mRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+            }
+        });
 
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override

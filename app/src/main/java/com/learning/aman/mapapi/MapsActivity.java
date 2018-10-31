@@ -90,7 +90,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GeoFire mGeoFire;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-    private String key, uid;
+    private String userID, uid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -187,56 +187,38 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void getUserLocation() {
+        if(userID != null && !userID.equals(uid)){
 
-        myDatabase.child("Locations").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            Log.e(TAG,uid+" - getUserLocation - "+userID);
+            myDatabase.child("Locations").child(userID).child("You").child("l").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    double lat = 0 , lng = 0;
 
-                for (DataSnapshot child: dataSnapshot.getChildren())
-                {
-                    String key = child.getKey().toString();  // Key Fatch User Id from Firebase Structure
-                    String value = child.getValue().toString();
+                    for (DataSnapshot child: dataSnapshot.getChildren()) {
+                        String key = child.getKey().toString();  // Key Fatch User Lat & Long from Firebase Structure
+                        String value = child.getValue().toString();
 
-                    if(!key.equals(uid)){
-//                        Log.e("Data",key+" = "+value);
-                        myDatabase.child("Locations").child(key).child("You").child("l").addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                double lat = 0 , lng = 0;
-
-                                for (DataSnapshot child: dataSnapshot.getChildren()) {
-                                    String key = child.getKey().toString();  // Key Fatch User Lat & Long from Firebase Structure
-                                    String value = child.getValue().toString();
-
-                                    Log.e("Data2",key+" = "+value);
-                                    if(key.equals("0")) {
+                        Log.e("Data2",key+" = "+value);
+                        if(key.equals("0")) {
 //                                        Log.e("Data3","Lat = "+value);
-                                        lat = Double.parseDouble(value);
-                                    }
-                                    if(key.equals("1")) {
+                            lat = Double.parseDouble(value);
+                        }
+                        if(key.equals("1")) {
 //                                        Log.e("Data3","Long = "+value);
-                                        lng = Double.parseDouble(value);
-                                    }
-                                }
-                                mUserLocation = new LatLng(lat,lng);
-                                addUserLocationMarker(MyLocation, mUserLocation);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
+                            lng = Double.parseDouble(value);
+                        }
                     }
+                    mUserLocation = new LatLng(lat,lng);
+                    addUserLocationMarker(MyLocation, mUserLocation);
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
-
+                }
+            });
+        }
     }
 
     public void onLocationChanged(Location location) {
@@ -289,12 +271,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         locationB.setLatitude(mUserLocation.latitude);
         locationB.setLongitude(mUserLocation.longitude);
 
+        if(mUserMarker == null){
+            mUserMarker = mMap.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
+                    .position(mUserLocation)
+                    .title("Your Friends")
+                    .snippet("Distance "+new DecimalFormat("#.#").format((locationA.distanceTo(locationB) / 1000))+ " KM"));
+        }
+        else {
+            MarkerAnimation.animateMarkerToICS(mUserMarker, mUserLocation, new LatLngInterpolator.Spherical());
+        }
+
+
         Log.e("addUserLocationMarker","User Location = "+mUserLocation);
-        mUserMarker = mMap.addMarker(new MarkerOptions()
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
-                .position(mUserLocation)
-                .title("Your Friends")
-                .snippet("Distance "+new DecimalFormat("#.#").format((locationA.distanceTo(locationB) / 1000))+ " KM"));
 
 //        drawPolylines(myLocation, mUserLocation);  //whenever need to draw line between nodes Just use this methohd
     }
@@ -556,6 +545,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         uid = mAuth.getCurrentUser().getUid();
         mGeoFire = new GeoFire(myDatabase.child("Locations").child(uid));
 
+        userID = getIntent().getStringExtra("UID");
+        Log.e(TAG,"USER ID = "+userID);
+
         if(uid == null){
             Log.e(TAG,"Not Logged In");
         }else {
@@ -586,6 +578,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         FirebaseAuth.getInstance().signOut();
                         startActivity(new Intent(MapsActivity.this, LoginActivity.class));
                         finish();
+                        break;
+
+                    case R.id.tracking:
+                        startActivity(new Intent(MapsActivity.this, UserListActivity.class));
                         break;
 
                     default: break;
