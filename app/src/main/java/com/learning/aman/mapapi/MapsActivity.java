@@ -69,6 +69,7 @@ import java.util.List;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback{
 
+    private static final String TAG = "MapsActivity";
 
     private LocationRequest mLocationRequest;
     private static final int REQUEST_FINE_LOCATION = 100;
@@ -78,22 +79,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng MyLocation, mUserLocation;
     private Marker MyLocationMarker, mUserMarker;
 
+    //DrawerLayout , ActionBar , Navigation & Toolbar Instance
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle toggle;
     private Toolbar toolbar;
     private NavigationView DrawerNavigation;
 
-    private String key, uid;
-
-
-
+    //Firebase & Geofire instance
     private DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
     private GeoFire mGeoFire;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-
-    ArrayList markerPoints= new ArrayList();
-
+    private String key, uid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +101,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        //init() & setUpNavigationDrawer() use for make drawer and Listner on menu Select
         init();
         setUpNavigationDrawer();
 
@@ -111,8 +109,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @SuppressLint("MissingPermission")
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        Log.i(TAG,"onMapReady");
+
+        if (checkPermissions()) {
+            googleMap.setMyLocationEnabled(false);
+            startLocationUpdates();
+            getLastLocation();
+            getUserLocation();
+
+        }
+
+
+    }
+
+    @SuppressLint("MissingPermission")
     protected void startLocationUpdates() {
-        Log.e("sdfas","startLocationUpdates");
+        Log.e(TAG,"startLocationUpdates");
 
         // Create the location request to start receiving updates
         mLocationRequest = new LocationRequest();
@@ -142,81 +158,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Looper.myLooper());
     }
 
-    public void onLocationChanged(Location location) {
-        Log.i("bncadvc","onLocationChanged");
-        MyLocation = new LatLng(location.getLatitude(), location.getLongitude());
+    public void getLastLocation() {
+        Log.e(TAG,"getLastLocation");
+        // Get last known recent location using new Google Play Services SDK (v11+)
+        FusedLocationProviderClient locationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        if (MyLocation != null) {
-            mGeoFire.setLocation("You", new GeoLocation(MyLocation.latitude, MyLocation.longitude),
-                    new GeoFire.CompletionListener() {
-                        @Override
-                        public void onComplete(String key, DatabaseError error) {
-                            myQueries();
-                            addMyLocationMarker();
-
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        locationClient.getLastLocation()
+                .addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // GPS location can be null if GPS is switched off
+                        if (location != null) {
+                            Log.i(TAG,"getLastLocation");
+                            onLocationChanged(location);
                         }
-                    });
-
-        } else {
-            // Log.i(Tag,"MyLocation is null");
-        }
-
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Error trying to get last GPS location");
+                        e.printStackTrace();
+                    }
+                });
     }
 
-    private void addMyLocationMarker() {
-        Log.e("bncadvc","addMyLocationMarker");
-
-        if (MyLocationMarker == null) {
-            MyLocationMarker = mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.c))
-                    .position(MyLocation)
-                    .title("YOU"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyLocation,14.5f));
-
-            // Log.i(Tag,"MyLocationMarker Added");
-        } else {
-            MarkerAnimation.animateMarkerToICS(MyLocationMarker, MyLocation, new LatLngInterpolator.Spherical());
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyLocation, 14.5f));
-
-            // Log.i(Tag,"MyLocationMarker updated");
-        }
-    }
-
-
-
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    @SuppressLint("MissingPermission")
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        Log.i("bncadvc","onMap");
-
-        if (checkPermissions()) {
-
-
-            Log.i("bncadvc","onMapReady");
-            googleMap.setMyLocationEnabled(false);
-            startLocationUpdates();
-            getLastLocation();
-
-            drawPolylines();
-
-        }
-
-
-    }
-
-    private void myQueries() {
+    private void getUserLocation() {
 
         myDatabase.child("Locations").addValueEventListener(new ValueEventListener() {
             @Override
@@ -229,17 +199,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     if(!key.equals(uid)){
 //                        Log.e("Data",key+" = "+value);
-
                         myDatabase.child("Locations").child(key).child("You").child("l").addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 double lat = 0 , lng = 0;
 
-
                                 for (DataSnapshot child: dataSnapshot.getChildren()) {
                                     String key = child.getKey().toString();  // Key Fatch User Lat & Long from Firebase Structure
                                     String value = child.getValue().toString();
-
 
                                     Log.e("Data2",key+" = "+value);
                                     if(key.equals("0")) {
@@ -250,31 +217,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                                        Log.e("Data3","Long = "+value);
                                         lng = Double.parseDouble(value);
                                     }
-
                                 }
                                 mUserLocation = new LatLng(lat,lng);
-
-                                Location locationA = new Location("Point A");
-                                locationA.setLatitude(MyLocation.latitude);
-                                locationA.setLongitude(MyLocation.longitude);
-
-                                Location locationB = new Location("Point B");
-                                locationB.setLatitude(mUserLocation.latitude);
-                                locationB.setLongitude(mUserLocation.longitude);
-
-//                                Location.distanceBetween(MyLocation.latitude, MyLocation.longitude, mUserLocation.latitude, mUserLocation.longitude, float[] result);
-
-                                Log.e("User Location"," = "+mUserLocation);
-                                mUserMarker = mMap.addMarker(new MarkerOptions()
-                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
-                                        .position(mUserLocation)
-                                        .title("Your Friends")
-                                        .snippet("Distance "+new DecimalFormat("#.#").format((locationA.distanceTo(locationB) / 1000))+ " KM"));
-
-//                                calculateDistance(MyLocation, mUserLocation);
-//                                Log.e("Distance",""+calculateDistance(MyLocation, mUserLocation));
-
-
+                                addUserLocationMarker(MyLocation, mUserLocation);
                             }
 
                             @Override
@@ -292,100 +237,66 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        mMap.addCircle(new CircleOptions()
-                .center(MyLocation)
-                .radius(2 * 1000) //2000 m
-                .strokeColor(Color.LTGRAY)
-//                .fillColor(0x40808080)
-                .strokeWidth(5.0f));
+    }
 
-        GeoQuery geoQuery = mGeoFire.queryAtLocation(new GeoLocation(MyLocation.latitude, MyLocation.longitude), 0.5f);
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-            @Override
-            public void onKeyEntered(String key, GeoLocation location) {
-                Log.e("onKeyEntered",location + " - "+key);
+    public void onLocationChanged(Location location) {
+        Log.i(TAG,"onLocationChanged");
+        MyLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
-//                Location itemLocation = new Location("itemLocation");
-//                itemLocation.setLatitude(location.latitude);
-//                itemLocation.setLongitude(location.longitude);
-//
-//                Log.e("Locations","LatLong - "+itemLocation);
-            }
+        if (MyLocation != null) {
 
-            @Override
-            public void onKeyExited(String key) {
-                Log.e("onKeyExited",""+key);
+            addMyLocationMarker();
+            mGeoFire.setLocation("You", new GeoLocation(MyLocation.latitude, MyLocation.longitude),
+                    new GeoFire.CompletionListener() {
+                        @Override
+                        public void onComplete(String key, DatabaseError error) {
+                            myQueries();
+                        }
+                    });
 
-            }
-
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-                Log.e("onKeyMoved","-"+key+"--"+location.latitude+"--"+location.latitude);
-
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-                Log.e("onGeoQueryError",""+error);
-
-            }
-        });
+        } else {
+            // Log.i(Tag,"MyLocation is null");
+        }
 
     }
 
-//    private double calculateDistance(LatLng myLocation, LatLng mUserLocation) {
-//        double theta = myLocation.longitude - mUserLocation.longitude;
-//        double dist = Math.sin(deg2rad(myLocation.latitude))
-//                    *Math.sin(deg2rad(mUserLocation.latitude))
-//                    *Math.cos(deg2rad(myLocation.latitude))
-//                    *Math.cos(deg2rad(mUserLocation.latitude))
-//                    *Math.cos(deg2rad(theta));
-//        dist = Math.acos(dist);
-//        dist = rad2deg(dist);
-//        dist = dist * 60 * 1.1515;
-//        return (dist);
-//    }
-//
-//    private double rad2deg(double rad) {
-//        return (rad * 180 / Math.PI);
-//    }
-//
-//    private double deg2rad(double deg) {
-//        return (deg * Math.PI / 180.0);
-//    }
+    private void addMyLocationMarker() {
+        Log.e(TAG,"addMyLocationMarker");
 
+        if (MyLocationMarker == null) {
+            MyLocationMarker = mMap.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.c))
+                    .position(MyLocation)
+                    .title("YOU"));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyLocation,14.5f));
 
-    public void getLastLocation() {
-        Log.e("sdfas","getLastLocation");
-        // Get last known recent location using new Google Play Services SDK (v11+)
-        FusedLocationProviderClient locationClient = LocationServices.getFusedLocationProviderClient(this);
+            // Log.i(Tag,"MyLocationMarker Added");
+        } else {
+            MarkerAnimation.animateMarkerToICS(MyLocationMarker, MyLocation, new LatLngInterpolator.Spherical());
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyLocation, 14.5f));
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+            // Log.i(Tag,"MyLocationMarker updated");
         }
-        locationClient.getLastLocation()
-                .addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // GPS location can be null if GPS is switched off
-                        if (location != null) {
-                            Log.i("bncadvc","getLastLocation");
-                            onLocationChanged(location);
-                        }
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d("MapDemoActivity", "Error trying to get last GPS location");
-                        e.printStackTrace();
-                    }
-                });
+    }
+
+    private void addUserLocationMarker(LatLng myLocation, LatLng mUserLocation) {
+
+        Location locationA = new Location("Point A");
+        locationA.setLatitude(myLocation.latitude);
+        locationA.setLongitude(myLocation.longitude);
+
+        Location locationB = new Location("Point B");
+        locationB.setLatitude(mUserLocation.latitude);
+        locationB.setLongitude(mUserLocation.longitude);
+
+        Log.e("addUserLocationMarker","User Location = "+mUserLocation);
+        mUserMarker = mMap.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
+                .position(mUserLocation)
+                .title("Your Friends")
+                .snippet("Distance "+new DecimalFormat("#.#").format((locationA.distanceTo(locationB) / 1000))+ " KM"));
+
+//        drawPolylines(myLocation, mUserLocation);  //whenever need to draw line between nodes Just use this methohd
     }
 
     private boolean checkPermissions() {
@@ -422,52 +333,74 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    private void drawPolylines() {
 
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+
+
+
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
+
+
+    private void myQueries() {
+//        mMap.addCircle(new CircleOptions()
+//                .center(MyLocation)
+//                .radius(2 * 1000) //2000 m
+//                .strokeColor(Color.LTGRAY)
+////                .fillColor(0x40808080)
+//                .strokeWidth(5.0f));
+
+        GeoQuery geoQuery = mGeoFire.queryAtLocation(new GeoLocation(MyLocation.latitude, MyLocation.longitude), 0.5f);
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
-            public void onMapClick(LatLng latLng) {
+            public void onKeyEntered(String key, GeoLocation location) {
+                Log.e("onKeyEntered",location + " - "+key);
+            }
 
-                if (markerPoints.size() > 1) {
-                    markerPoints.clear();
-                    mMap.clear();
-                }
+            @Override
+            public void onKeyExited(String key) {
+                Log.e("onKeyExited",""+key);
 
-                // Adding new item to the ArrayList
-                markerPoints.add(latLng);
+            }
 
-                // Creating MarkerOptions
-                MarkerOptions options = new MarkerOptions();
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+                Log.e("onKeyMoved","-"+key+"--"+location.latitude+"--"+location.latitude);
 
-                // Setting the position of the marker
-                options.position(latLng);
+            }
 
-                if (markerPoints.size() == 1) {
-                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                } else if (markerPoints.size() == 2) {
-                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                }
+            @Override
+            public void onGeoQueryReady() {
 
-                // Add new marker to the Google Map Android API V2
-                mMap.addMarker(options);
+            }
 
-                // Checks, whether start and end locations are captured
-                if (markerPoints.size() >= 2) {
-                    LatLng origin = (LatLng) markerPoints.get(0);
-                    LatLng dest = (LatLng) markerPoints.get(1);
-
-                    // Getting URL to the Google Directions API
-                    String url = getDirectionsUrl(origin, dest);
-                    Log.e("URL", " - "+url);
-
-                    DownloadTask downloadTask = new DownloadTask();
-
-                    // Start downloading json data from Google Directions API
-                    downloadTask.execute(url);
-                }
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                Log.e("onGeoQueryError",""+error);
 
             }
         });
+
+    }
+
+    private void drawPolylines(LatLng myLocation, LatLng mUserLocation) {
+
+        // Getting URL to the Google Directions API
+        Log.i(TAG, "drawPolylines: "+myLocation.toString()+" = "+mUserLocation.toString());
+
+        String url = getDirectionsUrl(myLocation, mUserLocation);
+        Log.e(TAG, "URL - "+url);
+
+        DownloadTask downloadTask = new DownloadTask();
+
+        // Start downloading json data from Google Directions API
+        downloadTask.execute(url);
     }
 
     private class DownloadTask extends AsyncTask<String, Void, String> {
@@ -476,7 +409,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected String doInBackground(String... url) {
 
             String data = "";
-
             try {
                 data = downloadUrl(url[0]);
             } catch (Exception e) {
@@ -490,8 +422,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             super.onPostExecute(result);
 
             ParserTask parserTask = new ParserTask();
-
-
             parserTask.execute(result);
 
         }
@@ -575,16 +505,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Output format
         String output = "json";
-        String key = "";
-
-//                getString(R.string.google_api_key);
-//                "AIzaSyCn0gNzArrwIbobr4RQnM9gVNAoSSdYSBo";
-//                Context.getString(R.string.google_api_key);
+        String key = getResources().getString(R.string.key);
 
         // Building the url to the web service
         String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key="+key;
-        Log.e("URL",key+" - "+url);
-
 
         return url;
     }
@@ -633,18 +557,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGeoFire = new GeoFire(myDatabase.child("Locations").child(uid));
 
         if(uid == null){
-            Log.e("MapActivity","Not Logged In");
+            Log.e(TAG,"Not Logged In");
         }else {
-            Log.e("MapActivity","Already Login - "+uid);
+            Log.e(TAG,"Already Login - "+uid);
 
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (toggle.onOptionsItemSelected(item))
-            return true;
-        return super.onOptionsItemSelected(item);
     }
 
     private void init() {
@@ -679,6 +596,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (toggle.onOptionsItemSelected(item))
+            return true;
+        return super.onOptionsItemSelected(item);
     }
 
 }

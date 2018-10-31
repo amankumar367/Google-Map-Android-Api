@@ -15,7 +15,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "12013416063-md4td3mq48knbcu1ahpa97pr8fk5966d.apps.googleusercontent.com",
+          "client_id": "12013416063-2ggttl6jso3qsaijcuo1kss2kni7s3ia.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.learning.aman.mapapi",
@@ -23,13 +23,13 @@
           }
         },
         {
-          "client_id": "12013416063-gnr1qptdbs893jhem3edl7fk55b6ip3r.apps.googleusercontent.com",
+          "client_id": "12013416063-562mi2ke7c5a82353g8o9lnucnqrg8d9.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCRLkGhLQ_Xg2tsXbzeDKtlqjkqvguvywY"
+          "current_key": "AIzaSyAtszMI0yDddoPMsGEvDOl-QNMzm_3iwmo"
         }
       ],
       "services": {
@@ -40,7 +40,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "12013416063-gnr1qptdbs893jhem3edl7fk55b6ip3r.apps.googleusercontent.com",
+              "client_id": "12013416063-562mi2ke7c5a82353g8o9lnucnqrg8d9.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
