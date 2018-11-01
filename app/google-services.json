@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "12013416063",
-    "firebase_url": "https://mapapi-219605.firebaseio.com",
-    "project_id": "mapapi-219605",
-    "storage_bucket": "mapapi-219605.appspot.com"
+    "project_number": "239496488110",
+    "firebase_url": "https://cureoremap.firebaseio.com",
+    "project_id": "cureoremap",
+    "storage_bucket": "cureoremap.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:12013416063:android:9d163d20a94392f8",
+        "mobilesdk_app_id": "1:239496488110:android:9d163d20a94392f8",
         "android_client_info": {
           "package_name": "com.learning.aman.mapapi"
         }
       },
       "oauth_client": [
         {
-          "client_id": "12013416063-2ggttl6jso3qsaijcuo1kss2kni7s3ia.apps.googleusercontent.com",
+          "client_id": "239496488110-ho9mkq1mk1luviqp7lb7tkr47gsegp1d.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.learning.aman.mapapi",
@@ -23,13 +23,13 @@
           }
         },
         {
-          "client_id": "12013416063-562mi2ke7c5a82353g8o9lnucnqrg8d9.apps.googleusercontent.com",
+          "client_id": "239496488110-17kl0tbkatj61tm85933rt8dmjinmmbj.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAtszMI0yDddoPMsGEvDOl-QNMzm_3iwmo"
+          "current_key": "AIzaSyA8GyWZV4nzSJtFA1-mN-3oUMIjv4eg13U"
         }
       ],
       "services": {
@@ -40,7 +40,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "12013416063-562mi2ke7c5a82353g8o9lnucnqrg8d9.apps.googleusercontent.com",
+              "client_id": "239496488110-17kl0tbkatj61tm85933rt8dmjinmmbj.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

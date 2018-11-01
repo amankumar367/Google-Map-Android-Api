@@ -285,7 +285,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Log.e("addUserLocationMarker","User Location = "+mUserLocation);
 
-//        drawPolylines(myLocation, mUserLocation);  //whenever need to draw line between nodes Just use this methohd
+        drawPolylines(myLocation, mUserLocation);  //whenever need to draw line between nodes Just use this methohd
     }
 
     private boolean checkPermissions() {
