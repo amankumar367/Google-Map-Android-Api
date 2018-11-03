@@ -76,6 +76,7 @@ public class UserListActivity extends AppCompatActivity {
                                 Intent intent = new Intent(UserListActivity.this, MapsActivity.class);
                                 intent.putExtra("UID",uid);
                                 startActivity(intent);
+                                finish();
                             }
                         });
                     }

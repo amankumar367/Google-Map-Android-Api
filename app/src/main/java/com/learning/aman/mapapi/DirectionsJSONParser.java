@@ -1,5 +1,6 @@
 package com.learning.aman.mapapi;
 
+import android.nfc.Tag;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -14,11 +15,17 @@ import java.util.List;
 
 public class DirectionsJSONParser {
 
+    String distance = null;
+    String duration = null;
 
     public DirectionsJSONParser() {
-
-        Log.e("AMAN","sdgdhd");
     }
+
+    public DirectionsJSONParser(String distance, String duration) {
+        this.distance = distance;
+        this.duration = duration;
+    }
+
     /** Receives a JSONObject and returns a list of lists containing latitude and longitude */
     public List<List<HashMap<String,String>>> parse(JSONObject jObject){
 
@@ -26,6 +33,8 @@ public class DirectionsJSONParser {
         JSONArray jRoutes = null;
         JSONArray jLegs = null;
         JSONArray jSteps = null;
+        JSONObject jDistance = null;
+        JSONObject jDuration = null;
 
         try {
 
@@ -40,6 +49,11 @@ public class DirectionsJSONParser {
                 /** Traversing all legs */
                 for(int j=0;j<jLegs.length();j++){
                     jSteps = ( (JSONObject)jLegs.get(j)).getJSONArray("steps");
+                    jDistance = ((JSONObject) jLegs.get(j)).getJSONObject("distance");
+                    jDuration = ((JSONObject) jLegs.get(j)).getJSONObject("duration");
+
+                    distance = jDistance.getString("text");
+                    duration = jDuration.getString("text");
 
                     /** Traversing all steps */
                     for(int k=0;k<jSteps.length();k++){

@@ -21,6 +21,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -44,6 +48,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -76,8 +81,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private long UPDATE_INTERVAL = 10 * 1000;  /* 10 secs */
     private long FASTEST_INTERVAL = 2000; /* 2 sec */
     private GoogleMap mMap;
-    private LatLng MyLocation, mUserLocation;
+    private LatLng MyLocation, MyLastLocation, mUserLocation, lastLocation;
     private Marker MyLocationMarker, mUserMarker;
+    private int distanceCount = 0;
 
     //DrawerLayout , ActionBar , Navigation & Toolbar Instance
     private DrawerLayout drawerLayout;
@@ -90,7 +96,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GeoFire mGeoFire;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-    private String userID, uid;
+    private ImageView mGPSLocation;
+    private TextView mDistance, mTime;
+    private LinearLayout time_distance;
+    private String userID, uid, distance, duration;
+    private boolean flag = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +115,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         init();
         setUpNavigationDrawer();
 
+        mGPSLocation = (ImageView) findViewById(R.id.locateMe);
+        mDistance = findViewById(R.id.setDistance);
+        mTime = findViewById(R.id.setTime);
+        time_distance = findViewById(R.id.time_distance);
 
     }
 
@@ -120,8 +134,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             startLocationUpdates();
             getLastLocation();
             getUserLocation();
-
         }
+
+        mGPSLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyLocation, 18.5f));
+            }
+        });
 
 
     }
@@ -153,6 +173,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void onLocationResult(LocationResult locationResult) {
                         // do work here
                         onLocationChanged(locationResult.getLastLocation());
+                        MyLastLocation = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
+
                     }
                 },
                 Looper.myLooper());
@@ -226,7 +248,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         MyLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
         if (MyLocation != null) {
-
             addMyLocationMarker();
             mGeoFire.setLocation("You", new GeoLocation(MyLocation.latitude, MyLocation.longitude),
                     new GeoFire.CompletionListener() {
@@ -235,10 +256,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             myQueries();
                         }
                     });
-
+            drawMyPolylines(MyLocation, MyLastLocation);
+            Toast.makeText(this, "Distcane in meter = "+distanceCount+" m", Toast.LENGTH_SHORT).show();
         } else {
             // Log.i(Tag,"MyLocation is null");
         }
+
 
     }
 
@@ -255,7 +278,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             // Log.i(Tag,"MyLocationMarker Added");
         } else {
             MarkerAnimation.animateMarkerToICS(MyLocationMarker, MyLocation, new LatLngInterpolator.Spherical());
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyLocation, 14.5f));
 
             // Log.i(Tag,"MyLocationMarker updated");
         }
@@ -273,7 +295,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if(mUserMarker == null){
             mUserMarker = mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
                     .position(mUserLocation)
                     .title("Your Friends")
                     .snippet("Distance "+new DecimalFormat("#.#").format((locationA.distanceTo(locationB) / 1000))+ " KM"));
@@ -281,7 +303,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         else {
             MarkerAnimation.animateMarkerToICS(mUserMarker, mUserLocation, new LatLngInterpolator.Spherical());
         }
-
 
         Log.e("addUserLocationMarker","User Location = "+mUserLocation);
 
@@ -325,6 +346,50 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
+    public void drawMyPolylines(LatLng myLocation, LatLng myLastLocation){
+
+        if(myLocation != null && myLastLocation != null){
+            if(flag){
+                Polyline line = mMap.addPolyline(new PolylineOptions()
+                        .add(new LatLng(myLocation.latitude, myLocation.longitude), new LatLng(myLastLocation.latitude, myLastLocation.longitude))
+                        .width(12)
+                        .color(Color.RED));
+
+                Location locationA = new Location("Point A");
+                locationA.setLatitude(myLocation.latitude);
+                locationA.setLongitude(myLocation.longitude);
+
+                Location locationB = new Location("Point B");
+                locationB.setLatitude(MyLastLocation.latitude);
+                locationB.setLongitude(MyLastLocation.longitude);
+                flag = true;
+                lastLocation = new LatLng(myLocation.latitude, myLocation.longitude);
+                distanceCount = (int) (distanceCount + locationA.distanceTo(locationB));
+
+            }else{
+                if(myLocation != null && lastLocation != null){
+                    Polyline line = mMap.addPolyline(new PolylineOptions()
+                            .add(new LatLng(myLocation.latitude, myLocation.longitude), new LatLng(lastLocation.latitude, lastLocation.longitude))
+                            .width(12)
+                            .color(Color.RED));
+
+                    Location locationA = new Location("Point A");
+                    locationA.setLatitude(myLocation.latitude);
+                    locationA.setLongitude(myLocation.longitude);
+
+                    Location locationB = new Location("Point B");
+                    locationB.setLatitude(lastLocation.latitude);
+                    locationB.setLongitude(lastLocation.longitude);
+
+                    distanceCount = (int) (distanceCount + locationA.distanceTo(locationB));
+//                    Log.e(TAG,"drawMyPolylines Distance = "+locationA.distanceTo(locationB));
+                }
+                lastLocation = new LatLng(myLocation.latitude, myLocation.longitude);
+
+            }
+            Log.e(TAG,myLocation+" = MyLocation | MyLastLocation = "+lastLocation);
+        }
+    }
 
     /**
      * Manipulates the map once available.
@@ -433,6 +498,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 DirectionsJSONParser parser = new DirectionsJSONParser();
 
                 routes = parser.parse(jObject);
+                distance = parser.distance;
+                duration = parser.duration;
+
+                Log.e(TAG,distance+" = Distance || Duration = "+duration);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -460,7 +529,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     points.add(position);
                 }
-
                 lineOptions.addAll(points);
                 lineOptions.width(12);
                 lineOptions.color(Color.RED);
@@ -538,6 +606,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -582,6 +651,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     case R.id.tracking:
                         startActivity(new Intent(MapsActivity.this, UserListActivity.class));
+                        finish();
                         break;
 
                     default: break;
