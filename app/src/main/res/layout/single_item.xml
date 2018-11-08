@@ -16,6 +16,8 @@
             android:layout_height="match_parent"
             android:text="User Name"
             android:textColor="#a4a0a0"
+            android:layout_marginLeft="20dp"
+            android:textStyle="bold"
             style="@style/Base.TextAppearance.AppCompat.Large" />
     </LinearLayout>
 

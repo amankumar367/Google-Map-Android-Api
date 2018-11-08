@@ -3,8 +3,18 @@
 
     <item
         android:id="@+id/tracking"
-        android:icon="@drawable/track"
+        android:icon="@drawable/route"
         android:title="Track User" />
+
+    <item
+        android:id="@+id/runtastic"
+        android:icon="@drawable/bicycle"
+        android:title="Runtastic" />
+
+    <item
+        android:id="@+id/locate_in_a_radius"
+        android:icon="@drawable/range"
+        android:title="Near By Me" />
 
     <item
         android:id="@+id/logout"
