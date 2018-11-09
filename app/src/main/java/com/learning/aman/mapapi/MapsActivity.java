@@ -54,8 +54,10 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -88,6 +90,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng MyLocation, MyLastLocation, mUserLocation, lastLocation;
     private Marker MyLocationMarker, mUserMarker;
     private int distanceCount = 0, mRuntasticDistance = 0, i = 1;
+    private int []v = new int[11];
 
     //DrawerLayout , ActionBar , Navigation & Toolbar Instance
     private DrawerLayout drawerLayout;
@@ -107,11 +110,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String userID, uid, distance, duration, mainTime;
     private boolean polyLine = false, runtastic = false, timer = false;
 
-    Chronometer chronometer;
-    Button startBtn, pauseBtn, resetBtn;
-    long stopTime = 0;
-
-    private ArrayList<HashMap<String, String>> arrayList;
+    private Chronometer chronometer;
+    private Button startBtn, pauseBtn, resetBtn;
+    private long stopTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +136,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         startBtn = findViewById(R.id.runtastic_startActivity);
         pauseBtn = findViewById(R.id.runtastic_pauseActivity);
         resetBtn = findViewById(R.id.runtastic_resetActivity);
+
 
     }
 
@@ -233,7 +235,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(userID != null && !userID.equals(uid)){
 
             Log.e(TAG,uid+" - getUserLocation - "+userID);
-            myDatabase.child("Locations").child(userID).child("You").child("l").addValueEventListener(new ValueEventListener() {
+            myDatabase.child("Locations").child(userID).child("You").child("1").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     double lat = 0 , lng = 0;
@@ -301,7 +303,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .title("You are here"));
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyLocation,14.5f));
 
-            // Log.i(Tag,"MyLocationMarker Added");
+//             Log.i(TAG,MyLocation.latitude+" - MyLocation - "+MyLocation.longitude);
         } else {
             MarkerAnimation.animateMarkerToICS(MyLocationMarker, MyLocation, new LatLngInterpolator.Spherical());
             // Log.i(Tag,"MyLocationMarker updated");
@@ -448,6 +450,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 chronometer.setBase(SystemClock.elapsedRealtime());
                 chronometer.stop();
 
+                i = 1;
                 stopTime = 0;
                 distanceCount = 0;
                 timer = true;
@@ -461,36 +464,80 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mEndActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                i = 1;
+                stopTime = chronometer.getBase() - SystemClock.elapsedRealtime();
+                chronometer.stop();
+                startBtn.setVisibility(View.VISIBLE);
+                pauseBtn.setVisibility(View.GONE);
+                timer = false;
+                runtastic = false;
 //                Toast.makeText(MapsActivity.this, "Wait", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(MapsActivity.this, DetailsActivity.class));
+//                startActivity(new Intent(MapsActivity.this, DetailsActivity.class));
 
-                            }
+            }
         });
 
 
     }
 
     private void pickUpExactTimeDistance(){
-        int x = 1000;
-        int z = x * i,
-                previousDistance = 0,
+        int x = 10;
+
+//        for(int i = 1; i < 11; i++){
+//            v[i] = x * i;
+//            Log.e(TAG, i+" - Index | Value - "+v[i]);
+//        }
+        int z = x * i;
+        int   previousDistance = 0,
                 afterwardDistance = 0,
                 distanceDifference = 0,
                 previousTime = 0,
                 afterwardTime= 0,
                 timeDifferene = 0,
-                leftDistance = 0;
-        if((distanceCount % 1000) == 0 && distanceCount != 0){
-            timePicker();
-        }else {
-            if( ((z-120) < distanceCount) && ((z+120) > distanceCount) ){
+                leftDistance = 0,
+                timeForLeftDistance = 0,
+                timeForZDistance = 0;
 
-                // Find distace Between -120 to +120
+        int fivePercentOfZ , tenPercentOfZ , twelvePercentOfZ ;
+        fivePercentOfZ = (z * 5) /100;
+        tenPercentOfZ = (z * 10) /100;
+        twelvePercentOfZ = (z * 12) /100;
+
+        String lat = null, lng = null ;
+
+        if((distanceCount % 10) == 0 && distanceCount != 0){
+            timePicker();
+
+            lat = String.valueOf(MyLocation.latitude);
+            lng = String.valueOf(MyLocation.longitude);
+            HashMap<String, String> hashMap = new HashMap<>();
+            hashMap.put("distance", String.valueOf(distanceCount));
+            hashMap.put("time", mainTime);
+            hashMap.put("lat", lat);
+            hashMap.put("lng", lng);
+            myDatabase.child("Runtastic").child(uid).push().setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()){
+                        Toast.makeText(MapsActivity.this, "Distance - "+distanceCount+" Time - "+mainTime+" MyLocation -" +MyLocation, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }else {
+
+            if( ((z - twelvePercentOfZ) < distanceCount) && ((z + twelvePercentOfZ) > distanceCount) ){
+
+                i++;
+
+                // Find distace Between range of -120 to +120
                 if(z > distanceCount){
                     previousDistance = distanceCount;
                     timePicker();
                     previousTime = Integer.parseInt(mainTime);
                     leftDistance = z - distanceCount;
+
+                    lat = String.valueOf(MyLocation.latitude);
+                    lng = String.valueOf(MyLocation.longitude);
                 }
                 if(z < distanceCount){
                     afterwardDistance = distanceCount;
@@ -500,14 +547,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 distanceDifference = afterwardDistance - previousDistance;
                 timeDifferene = afterwardTime - previousTime;
 
-                if( ((z-100) < distanceCount) && ((z+100) > distanceCount) ){
+                if( ((z - tenPercentOfZ) < distanceCount) && ((z + tenPercentOfZ) > distanceCount) ){
 
-                    // Find distace Between -100 to +100
+                    i--;
+                    i++;
+                    // Find distace Between range of -100 to +100
                     if(z > distanceCount){
                         previousDistance = distanceCount;
                         timePicker();
                         previousTime = Integer.parseInt(mainTime);
                         leftDistance = z - distanceCount;
+                        lat = String.valueOf(MyLocation.latitude);
+                        lng = String.valueOf(MyLocation.longitude);
                     }
                     if(z < distanceCount){
                         afterwardDistance = distanceCount;
@@ -517,14 +568,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     distanceDifference = afterwardDistance - previousDistance;
                     timeDifferene = afterwardTime - previousTime;
 
-                    if( ((z-50) < distanceCount) && ((z+50) > distanceCount) ){
-
-                            // Find distace Between -50 to +50
+                    if( ((z - fivePercentOfZ) < distanceCount) && ((z + fivePercentOfZ) > distanceCount) ){
+                        i--;
+                        i++;
+                            // Find distace Between range of -50 to +50
                             if(z > distanceCount){
                                 previousDistance = distanceCount;
                                 timePicker();
                                 previousTime = Integer.parseInt(mainTime);
                                 leftDistance = z - distanceCount;
+                                lat = String.valueOf(MyLocation.latitude);
+                                lng = String.valueOf(MyLocation.longitude);
                             }
                             if(z < distanceCount){
                                 afterwardDistance = distanceCount;
@@ -533,11 +587,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             }
                             distanceDifference = afterwardDistance - previousDistance;
                             timeDifferene = afterwardTime - previousTime;
+                            i++;
                         }
                     }
+                    try {
+
+                        timeForLeftDistance = (timeDifferene % distanceDifference) * leftDistance;
+                        timeForZDistance = previousTime + timeForLeftDistance;
+
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    HashMap<String, String> hashMap = new HashMap<>();
+                    hashMap.put("distance",String.valueOf(z));
+                    hashMap.put("time",String.valueOf(timeForZDistance));
+                    hashMap.put("lat",lat);
+                    hashMap.put("lng",lng);
+                    myDatabase.child("Runtastic").child(uid).push().setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                Toast.makeText(MapsActivity.this, "Distance - "+distanceCount+" Time - "+mainTime+" MyLocation -" +MyLocation, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
                 }
             }
-        i++;
+//        Toast.makeText(this, "Value of I - "+i, Toast.LENGTH_SHORT).show();
     }
 
     private void timePicker() {
@@ -955,5 +1032,4 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         addMyLocationMarker();
         Toast.makeText(MapsActivity.this, "We are working on it", Toast.LENGTH_SHORT).show();
     }
-
 }

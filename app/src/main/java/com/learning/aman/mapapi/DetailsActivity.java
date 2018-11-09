@@ -5,27 +5,45 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class DetailsActivity extends AppCompatActivity {
 
-    // ArrayList for person names
-    ArrayList personNames = new ArrayList<>(Arrays.asList("Person 1", "Person 2", "Person 3", "Person 4", "Person 5", "Person 6", "Person 7"));
-    @Override
+    private RecyclerView mUserDetails;
+    private DatabaseReference mDatabase;
+
+    private static final String TAG = "DetailsActivity";
+       @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
-        // get the reference of RecyclerView
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+           mUserDetails = (RecyclerView) findViewById(R.id.user_recyclerView);
+           mUserDetails.setHasFixedSize(true);
+           mUserDetails.setLayoutManager(new LinearLayoutManager(this));
+    }
 
-        // set a LinearLayoutManager with default vertical orientation
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(linearLayoutManager);
+    @Override
+    protected void onStart() {
+        super.onStart();
 
-        //  call the constructor of DetailsAdapter to send the reference and data to Adapter
-        DetailsAdapter detailsAdapter = new DetailsAdapter(DetailsActivity.this, personNames);
-        recyclerView.setAdapter(detailsAdapter); // set the Adapter to RecyclerView
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("Runtastic");
+
+        Query query = mDatabase.orderByChild("distance");
+
+        FirebaseRecyclerOptions<DetailsModel> firebaseRecyclerOptions =
+                new FirebaseRecyclerOptions.Builder<DetailsModel>()
+                .setQuery(query, DetailsModel.class)
+                .build();
+
+//        FirebaseRecyclerAdapter<DetailsModel, DetailsModelVieHolder> firebaseRecyclerAdapter =
+//                FirebaseRecyclerAdapter<>
     }
 }
