@@ -90,7 +90,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Distance (KM)"
+                        android:text="Distance (meter)"
                         android:textColor="#000000"
                         android:textSize="15dp"/>
                 </LinearLayout>

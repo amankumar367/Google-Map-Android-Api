@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/time"
@@ -19,7 +20,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="Time"
-            android:textColor="#000000"
+            android:textColor="#7b7777"
             android:textStyle="bold"
             android:textSize="25dp"
             android:gravity="center"
@@ -31,7 +32,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="Distance"
-            android:textColor="#000000"
+            android:textColor="#7b7777"
             android:textStyle="bold"
             android:textSize="25dp"
             android:gravity="center" />
@@ -41,12 +42,102 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_margin="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="Total Distance"
+                android:textColor="#7b7777"
+                android:textStyle="bold"
+                android:textSize="22dp"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/totalDistance"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="Total Distance"
+                android:textColor="#338de7"
+                android:textStyle="bold|italic"
+                android:textSize="20dp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="Total Time"
+                android:textColor="#7b7777"
+                android:textStyle="bold"
+                android:textSize="22dp"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/totalTime"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="Total Time"
+                android:textColor="#338de7"
+                android:textStyle="bold|italic"
+                android:textSize="20dp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="Average Speed"
+                android:textColor="#7b7777"
+                android:textStyle="bold"
+                android:textSize="22dp"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/avgSpeed"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="Average Speed"
+                android:textColor="#338de7"
+                android:textStyle="bold|italic"
+                android:textSize="20dp"
+                android:gravity="center"/>
+        </LinearLayout>
 
     </LinearLayout>
 
