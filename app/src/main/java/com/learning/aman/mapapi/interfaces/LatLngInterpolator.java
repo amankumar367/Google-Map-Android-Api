@@ -1,4 +1,4 @@
-package com.learning.aman.mapapi;
+package com.learning.aman.mapapi.interfaces;
 
 import com.google.android.gms.maps.model.LatLng;
 

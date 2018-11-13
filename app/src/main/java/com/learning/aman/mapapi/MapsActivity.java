@@ -66,6 +66,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.learning.aman.mapapi.PrefrenceManager.PrefManager;
+import com.learning.aman.mapapi.interfaces.LatLngInterpolator;
 import com.learning.aman.mapapi.service.TraceService;
 
 import org.json.JSONObject;
@@ -373,12 +374,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if(pickUpExactTimeDistance(z[j])){
                     pickUpApproxAfterTimeDistance(z[j]);
                 }
-                Toast.makeText(this, j+" - J \n"
-                        +previousDistance +" - previousDistance \n"
-                        +previousTime+" - previousTime \n"
-                        +afterwardDistance+" - afterwardDistance \n"
-                        +afterwardTime+" - afterwardTime \n"
-                        +leftDistance+" - leftDistance", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, j+" - J \n"
+//                        +previousDistance +" - previousDistance \n"
+//                        +previousTime+" - previousTime \n"
+//                        +afterwardDistance+" - afterwardDistance \n"
+//                        +afterwardTime+" - afterwardTime \n"
+//                        +leftDistance+" - leftDistance", Toast.LENGTH_SHORT).show();
 
                 if(afterwardDistance != 0 && afterwardTime != null){
                     distanceDifference = afterwardDistance - previousDistance;
