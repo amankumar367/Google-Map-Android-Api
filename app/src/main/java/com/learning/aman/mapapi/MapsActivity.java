@@ -83,6 +83,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -101,13 +103,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int []z = new int[11];
 
     // Instance of  int and string value for pickUpExactTimeDistance()
-    int   previousDistance = 0,
+    private int   previousDistance = 0,
             afterwardDistance = 0,
             distanceDifference = 0,
             leftDistance = 0,
             timeForLeftDistance = 0;
-    String previousTime, afterwardTime, timeAtZDistance;
-    String lat = null, lng = null ;
+    private String previousTime, afterwardTime, timeAtZDistance;
+    private String lat = null, lng = null ;
+    private int unique = 0;
+    private String uniqueID;
 
     //DrawerLayout , ActionBar , Navigation & Toolbar Instance
     private DrawerLayout drawerLayout;
@@ -164,6 +168,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.e(TAG, i+" - Index | Value - "+z[i]);
 
         }
+
+        Random random= new Random();
+        unique = random.nextInt(100)+1;
 
 //        try
 //        {
@@ -330,7 +337,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     }
                     mUserLocation = new LatLng(lat,lng);
-                    addUserLocationMarker(MyLocation, mUserLocation);
+                    if(MyLocation != null){
+                        addUserLocationMarker(MyLocation, mUserLocation);
+                    }
                 }
 
                 @Override
@@ -364,12 +373,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if(pickUpExactTimeDistance(z[j])){
                     pickUpApproxAfterTimeDistance(z[j]);
                 }
-//                Toast.makeText(this, j+" - J \n"
-//                        +previousDistance +" - previousDistance \n"
-//                        +previousTime+" - previousTime \n"
-//                        +afterwardDistance+" - afterwardDistance \n"
-//                        +afterwardTime+" - afterwardTime \n"
-//                        +leftDistance+" - leftDistance", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, j+" - J \n"
+                        +previousDistance +" - previousDistance \n"
+                        +previousTime+" - previousTime \n"
+                        +afterwardDistance+" - afterwardDistance \n"
+                        +afterwardTime+" - afterwardTime \n"
+                        +leftDistance+" - leftDistance", Toast.LENGTH_SHORT).show();
 
                 if(afterwardDistance != 0 && afterwardTime != null){
                     distanceDifference = afterwardDistance - previousDistance;
@@ -379,7 +388,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     if(timeAtZDistance != null){
 //                        Toast.makeText(this, "Time Required For  Exact Point - "+timeAtZDistance, Toast.LENGTH_SHORT).show();
-                        setTimeDistanceMarker(timeAtZDistance, z[j-1], lat, lng);
+                        setTimeDistanceMarker(timeAtZDistance, afterwardDistance, lat, lng);
 
                     }
 
@@ -432,9 +441,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         Log.e("addUserLocationMarker","User Location = "+mUserLocation);
-//        mMap.clear();   //Clear and set up map again
-//        MyLocationMarker = null;
-//        addMyLocationMarker();
         drawPolylines(myLocation, mUserLocation);  //whenever need to draw line between nodes Just use this methohd
     }
 
@@ -511,6 +517,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 runtastic = true;
 
                 startService();
+                uniqueID = UUID.randomUUID().toString();
 
                 startBtn.setVisibility(View.GONE);
                 pauseBtn.setVisibility(View.VISIBLE);
@@ -607,7 +614,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private boolean pickUpExactTimeDistance(int i){
 
-        if(distanceCount % 500 == 0 && distanceCount != 0){
+        if(distanceCount % 500  == 0 && distanceCount != 0){
             timePicker();
 
             lat = String.valueOf(MyLocation.latitude);
@@ -691,7 +698,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             j++;
         }else{
-
+            if( (i + twelvePercentOfZ) < distanceCount){
+                j++;
+            }
         }
 
     }
@@ -707,7 +716,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             String ss = s < 10 ? "0"+s: s+"";
             mainTime = hh+":"+mm+":"+ss;
 
-            Toast.makeText(MapsActivity.this, distanceCount + " - Distance | Time Picker | Time - " + mainTime, Toast.LENGTH_LONG).show();
+//            Toast.makeText(MapsActivity.this, distanceCount + " - Distance | Time Picker | Time - " + mainTime, Toast.LENGTH_LONG).show();
 //            arrayList = new ArrayList<HashMap<String,String>>();
 //
 //            HashMap<String, String> h1 = new HashMap<String, String>();
@@ -781,7 +790,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         hashMap.put("time", mainTime);
         hashMap.put("lat", lat);
         hashMap.put("lng", lng);
-        myDatabase.child("Runtastic").child(uid).push().setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+        myDatabase.child("Runtastic").child(uid).child(uniqueID).push().setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
@@ -1167,7 +1176,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         MyLocationMarker = null;
         addMyLocationMarker();
         startActivity(new Intent(MapsActivity.this, UserListActivity.class));
-
+        finish();
     }
 
     private void setUpRuntastic() {

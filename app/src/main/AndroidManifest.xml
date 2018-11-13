@@ -53,7 +53,7 @@
             android:screenOrientation="portrait" />
         <activity android:name=".DetailsActivity"></activity>
 
-        <service android:name=".service.TraceService"/>
+        <service android:name=".service.TraceService" />
     </application>
 
 </manifest>
