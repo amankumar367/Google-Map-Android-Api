@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -22,7 +23,7 @@ import java.util.PriorityQueue;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText mEmail, mPassword;
-    private Button mLogin;
+    private Button mLogin, mRegister;
 
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
@@ -34,9 +35,15 @@ public class LoginActivity extends AppCompatActivity {
 
         mEmail = findViewById(R.id.email);
         mPassword =  findViewById(R.id.password);
-
-
         mLogin = (Button) findViewById(R.id.loginButton);
+        mRegister = (Button) findViewById(R.id.register_button);
+
+        mRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+            }
+        });
 
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,7 +77,13 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 else{
                     Log.e("login","failed");
-                    Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
+                    task.addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(LoginActivity.this, "Login Failed - " + e, Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    });
 
                 }
 
@@ -85,11 +98,11 @@ public class LoginActivity extends AppCompatActivity {
 
         if(FirebaseAuth.getInstance().getCurrentUser() == null){
 
-            Log.e("login","Not Logged In");
+            Log.e("LoginActivity","Not Logged In");
 
 
         }else {
-            Log.e("login","Already Login");
+            Log.e("LoginActivity","Already Login");
             Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
             startActivity(intent);
             finish();
