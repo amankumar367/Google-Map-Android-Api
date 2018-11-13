@@ -65,6 +65,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.learning.aman.mapapi.PrefrenceManager.PrefManager;
+import com.learning.aman.mapapi.service.TraceService;
 
 import org.json.JSONObject;
 
@@ -74,7 +76,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.Time;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback{
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "MapsActivity";
 
@@ -96,7 +97,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng MyLocation, MyLastLocation, mUserLocation, lastLocation;
     private Marker MyLocationMarker, mUserMarker;
 
-    private int distanceCount = 0, mRuntasticDistance = 0, j = 1, x = 100, k = 10;
+    private int distanceCount = 0, mRuntasticDistance = 0, j = 1, x = 500, k = 10;
     private int []z = new int[11];
 
     // Instance of  int and string value for pickUpExactTimeDistance()
@@ -131,6 +132,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button startBtn, pauseBtn, resetBtn;
     private long stopTime = 0;
 
+    //SharedPrefrence
+    private PrefManager prefManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,6 +144,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        prefManager = new PrefManager(this);
         //init() & setUpNavigationDrawer() use for make drawer and Listner on menu Select
         init();
         setUpNavigationDrawer();
@@ -359,12 +364,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if(pickUpExactTimeDistance(z[j])){
                     pickUpApproxAfterTimeDistance(z[j]);
                 }
-                Toast.makeText(this, j+" - J \n"
-                        +previousDistance +" - previousDistance \n"
-                        +previousTime+" - previousTime \n"
-                        +afterwardDistance+" - afterwardDistance \n"
-                        +afterwardTime+" - afterwardTime \n"
-                        +leftDistance+" - leftDistance", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, j+" - J \n"
+//                        +previousDistance +" - previousDistance \n"
+//                        +previousTime+" - previousTime \n"
+//                        +afterwardDistance+" - afterwardDistance \n"
+//                        +afterwardTime+" - afterwardTime \n"
+//                        +leftDistance+" - leftDistance", Toast.LENGTH_SHORT).show();
 
                 if(afterwardDistance != 0 && afterwardTime != null){
                     distanceDifference = afterwardDistance - previousDistance;
@@ -373,8 +378,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     timeAtZDistance = addTimeToPrevious(previousTime, timeForLeftDistance);
 
                     if(timeAtZDistance != null){
-                        Toast.makeText(this, "Time Required For  Exact Point - "+timeAtZDistance, Toast.LENGTH_SHORT).show();
-
+//                        Toast.makeText(this, "Time Required For  Exact Point - "+timeAtZDistance, Toast.LENGTH_SHORT).show();
                         setTimeDistanceMarker(timeAtZDistance, z[j-1], lat, lng);
 
                     }
@@ -428,7 +432,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         Log.e("addUserLocationMarker","User Location = "+mUserLocation);
-
+//        mMap.clear();   //Clear and set up map again
+//        MyLocationMarker = null;
+//        addMyLocationMarker();
         drawPolylines(myLocation, mUserLocation);  //whenever need to draw line between nodes Just use this methohd
     }
 
@@ -503,6 +509,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 chronometer.start();
                 timer = true;
                 runtastic = true;
+
+                startService();
+
                 startBtn.setVisibility(View.GONE);
                 pauseBtn.setVisibility(View.VISIBLE);
 
@@ -577,6 +586,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 chronometer.setBase(SystemClock.elapsedRealtime());
                 chronometer.stop();
 
+                stopService();
+
                 timer = false;
                 runtastic = false;
 
@@ -596,7 +607,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private boolean pickUpExactTimeDistance(int i){
 
-        if(distanceCount % 100 == 0 && distanceCount != 0){
+        if(distanceCount % 500 == 0 && distanceCount != 0){
             timePicker();
 
             lat = String.valueOf(MyLocation.latitude);
@@ -907,6 +918,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         downloadTask.execute(url);
     }
 
+
+
     private class DownloadTask extends AsyncTask<String, Void, String> {
 
         @Override
@@ -1064,6 +1077,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         uid = mAuth.getCurrentUser().getUid();
         mGeoFire = new GeoFire(myDatabase.child("Locations").child(uid));
 
+        prefManager.setCurrentUser(uid);
+
         userID = getIntent().getStringExtra("UID");
         Log.e(TAG,"USER ID = "+userID);
 
@@ -1206,5 +1221,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 doubleBackToExitPressedOnce=false;
             }
         }, 2000);
+    }
+
+    private void startService(){
+        //startService(new Intent(getApplicationContext(),TraceService.class));
+        Intent intent=new Intent(MapsActivity.this, TraceService.class);
+        intent.putExtra("UID",uid);
+        startService(intent);
+    }
+
+    private void stopService(){
+
+        stopService(new Intent(MapsActivity.this, TraceService.class));
     }
 }
