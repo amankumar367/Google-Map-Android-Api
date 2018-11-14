@@ -82,7 +82,7 @@ public class TraceService extends Service implements GoogleApiClient.ConnectionC
         uid = prefManager.getCurrentUser();
         mGeoFire = new GeoFire(mDatabase.child("Locations").child(uid));
 
-        Toast.makeText(this, "CurrentUser - "+uid, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "CurrentUser - "+uid, Toast.LENGTH_SHORT).show();
         return START_STICKY;
     }
 

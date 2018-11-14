@@ -100,10 +100,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng MyLocation, MyLastLocation, mUserLocation, lastLocation;
     private Marker MyLocationMarker, mUserMarker;
 
-    private int distanceCount = 0, mRuntasticDistance = 0, j = 1, x = 500, k = 10;
-    private int []z = new int[11];
+    private int distanceCount = 0, mRuntasticDistance = 0, j = 1, x = 1000, k = 20;
+    private int []z = new int[k + 2];
 
-    // Instance of  int and string value for pickUpExactTimeDistance()
+    // Instance of  int and string value for pickUpExactTimeDistance() & setTimeDistanceMarker()
     private int   previousDistance = 0,
             afterwardDistance = 0,
             distanceDifference = 0,
@@ -111,7 +111,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             timeForLeftDistance = 0;
     private String previousTime, afterwardTime, timeAtZDistance;
     private String lat = null, lng = null ;
-    private int unique = 0;
     private String uniqueID;
 
     //DrawerLayout , ActionBar , Navigation & Toolbar Instance
@@ -167,12 +166,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         for(int i = 1; i <= k ; i++){
             z[i] = x * i;
             Log.e(TAG, i+" - Index | Value - "+z[i]);
-
         }
-
-        Random random= new Random();
-        unique = random.nextInt(100)+1;
-
 //        try
 //        {
 //            SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
@@ -231,6 +225,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             startLocationUpdates();
             getLastLocation();
             getUserLocation();
+            startService();
         }
 
         mGPSLocation.setOnClickListener(new View.OnClickListener() {
@@ -341,6 +336,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if(MyLocation != null){
                         addUserLocationMarker(MyLocation, mUserLocation);
                     }
+                    else {
+                        myDatabase.child("Locations").child(uid).child("You").child("l").addValueEventListener(new ValueEventListener() {
+
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                double lat = 0 , lng = 0;
+
+                                String latitude = dataSnapshot.child("0").getValue().toString();
+                                String longitude = dataSnapshot.child("1").getValue().toString();
+                                Log.e(TAG,latitude+" -OWN- "+longitude);
+
+                                lat = Double.parseDouble(latitude);
+                                lng = Double.parseDouble(longitude);
+                                MyLocation = new LatLng(lat, lng);
+                                addUserLocationMarker(MyLocation, mUserLocation);
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
                 }
 
                 @Override
@@ -358,6 +377,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (MyLocation != null) {
             addMyLocationMarker();
+
+            // Insert MYLOCATION in Firebase RealTime Dataease Using GeoFire
             mGeoFire.setLocation("You", new GeoLocation(MyLocation.latitude, MyLocation.longitude),
                     new GeoFire.CompletionListener() {
                         @Override
@@ -379,7 +400,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                        +previousTime+" - previousTime \n"
 //                        +afterwardDistance+" - afterwardDistance \n"
 //                        +afterwardTime+" - afterwardTime \n"
-//                        +leftDistance+" - leftDistance", Toast.LENGTH_SHORT).show();
+//                        +leftDistance+" - leftDistance\n"
+//                        +distanceCount+" - distanceCount", Toast.LENGTH_SHORT).show();
+
+                Log.e(TAG,j+" - J \n"
+                        +previousDistance +" - previousDistance \n"
+                        +previousTime+" - previousTime \n"
+                        +afterwardDistance+" - afterwardDistance \n"
+                        +afterwardTime+" - afterwardTime \n"
+                        +leftDistance+" - leftDistance\n"
+                        +distanceCount+" - distanceCount");
 
                 if(afterwardDistance != 0 && afterwardTime != null){
                     distanceDifference = afterwardDistance - previousDistance;
@@ -517,8 +547,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 timer = true;
                 runtastic = true;
 
-                startService();
                 uniqueID = UUID.randomUUID().toString();
+                previousTime = "00:00:00";
+//                setTimeDistanceMarker(previousTime, z[0], String.valueOf(MyLocation.latitude), String.valueOf(MyLocation.longitude));
 
                 startBtn.setVisibility(View.GONE);
                 pauseBtn.setVisibility(View.VISIBLE);
@@ -536,24 +567,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 timer = false;
                 runtastic = false;
 
-                long time = SystemClock.elapsedRealtime() - chronometer.getBase();
-                chronometer.stop();
-                int h   = (int)(time /3600000);
-                int m = (int)(time - h*3600000)/60000;
-                int s= (int)(time - h*3600000- m*60000)/1000 ;
-                String hh = h < 10 ? "0"+h: h+"";
-                String mm = m < 10 ? "0"+m: m+"";
-                String ss = s < 10 ? "0"+s: s+"";
-                mainTime = hh+":"+mm+":"+ss;
+//                long time = SystemClock.elapsedRealtime() - chronometer.getBase();
+//                chronometer.stop();
+//                int h   = (int)(time /3600000);
+//                int m = (int)(time - h*3600000)/60000;
+//                int s= (int)(time - h*3600000- m*60000)/1000 ;
+//                String hh = h < 10 ? "0"+h: h+"";
+//                String mm = m < 10 ? "0"+m: m+"";
+//                String ss = s < 10 ? "0"+s: s+"";
+//                mainTime = hh+":"+mm+":"+ss;
 //                if(chronometer.getText().toString().equals("00:05")){
 //
 //                    Toast.makeText(MapsActivity.this, "chronometer", Toast.LENGTH_SHORT).show();
 //
 //                }
-                if(distanceCount > 1) {
-
-                    Toast.makeText(MapsActivity.this, distanceCount + " - Distance | pauseBtn | Time - " + mainTime, Toast.LENGTH_SHORT).show();
-                }
+//                if(distanceCount > 1) {
+//
+//                    Toast.makeText(MapsActivity.this, distanceCount + " - Distance | pauseBtn | Time - " + mainTime, Toast.LENGTH_SHORT).show();
+//                }
             }
         });
 
@@ -573,7 +604,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 MyLocationMarker = null;
                 addMyLocationMarker();
 
-
                 mDistance.setText(String.valueOf(distanceCount));
                 startBtn.setVisibility(View.VISIBLE);
                 pauseBtn.setVisibility(View.GONE);
@@ -584,7 +614,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 j = 1;
                 timePicker();
+                setTimeDistanceMarker(mainTime, distanceCount, String.valueOf(MyLocation.latitude), String.valueOf(MyLocation.longitude));
 //                Log.e(TAG, "totalTime - "+mainTime);
+
 
                 Intent mEndAcitvityIntent = new Intent(MapsActivity.this, DetailsActivity.class);
                 mEndAcitvityIntent.putExtra("Distacne", String.valueOf(distanceCount));
@@ -593,8 +625,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 chronometer.setBase(SystemClock.elapsedRealtime());
                 chronometer.stop();
-
-                stopService();
 
                 timer = false;
                 runtastic = false;
@@ -607,6 +637,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 pauseBtn.setVisibility(View.GONE);
                 stopTime = 0;
                 distanceCount = 0;
+                mDistance.setText(String.valueOf(distanceCount));
 //                Toast.makeText(MapsActivity.this, "Wait", Toast.LENGTH_SHORT).show();
 //                startActivity(new Intent(MapsActivity.this, DetailsActivity.class));
             }
@@ -615,7 +646,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private boolean pickUpExactTimeDistance(int i){
 
-        if(distanceCount % 500  == 0 && distanceCount != 0){
+        if(distanceCount % x  == 0 && distanceCount != 0){
             timePicker();
 
             lat = String.valueOf(MyLocation.latitude);
@@ -661,6 +692,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     leftDistance = i - distanceCount;
                 }
             }
+        }else {
+//            if(z[j] < distanceCount && z[j + 1] > distanceCount){
+//                previousDistance = distanceCount;
+//                timePicker();
+//                previousTime = mainTime;
+//                leftDistance = z[j + 1] - distanceCount;
+//            }
+//            if(z[j + 1] < distanceCount && z[j + 2] > distanceCount){
+//                previousDistance = distanceCount;
+//                timePicker();
+//                previousTime = mainTime;
+//                leftDistance = z[j + 2] - distanceCount;
+//            }
+//            if(z[j + 2] < distanceCount && z[j + 3] > distanceCount){
+//                previousDistance = distanceCount;
+//                timePicker();
+//                previousTime = mainTime;
+//                leftDistance = z[j + 3] - distanceCount;
+//            }
         }
     }
 
@@ -699,9 +749,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             j++;
         }else{
-            if( (i + twelvePercentOfZ) < distanceCount){
-                j++;
-            }
+//            if((z[j] < distanceCount) && (z[j + 1] > distanceCount)){
+//                j = j + 1;
+//            }
+//            if((z[j + 1] < distanceCount) && (z[j + 2] > distanceCount)){
+//                j = j + 2;
+//            }
+//            if((z[j + 2] < distanceCount) && (z[j + 3] > distanceCount)){
+//                j = j + 3;
+//            }
         }
 
     }
@@ -784,37 +840,37 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return null;
     }
 
-    private void setTimeDistanceMarker(final String mTime, final int distanceCount, String lat, String lng){
+    private void setTimeDistanceMarker(final String mTime, final int distanceCount, final String lat, final String lng){
 
         HashMap<String, String> hashMap = new HashMap<>();
         hashMap.put("distance", String.valueOf(distanceCount));
-        hashMap.put("time", mainTime);
+        hashMap.put("time", mTime);
         hashMap.put("lat", lat);
         hashMap.put("lng", lng);
         myDatabase.child("Runtastic").child(uid).child(uniqueID).push().setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
+
+                    Double lattitude = Double.parseDouble(lat);
+                    Double longitude = Double.parseDouble(lng);
+                    LatLng mRunstaticLocation = new LatLng(lattitude, longitude);
+                    Marker mRunstaticMarker = mMap.addMarker(new MarkerOptions()
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                            .position(mRunstaticLocation)
+                            .title(distanceCount+"m Completed")
+                            .snippet("Distance - "+distanceCount
+                                    +" Time - "+mTime));
+
                     Toast.makeText(MapsActivity.this, "Distance - "+distanceCount+"\nTime - "+mainTime+"\nMyLocation -" +MyLocation, Toast.LENGTH_SHORT).show();
                     previousDistance = 0;
-                    previousTime = null;
+                    previousTime = "00:00:00";
                     afterwardDistance = 0;
                     afterwardTime = null;
                     leftDistance = 0;
                 }
             }
         });
-
-        Double lattitude = Double.parseDouble(lat);
-        Double longitude = Double.parseDouble(lng);
-        LatLng mRunstaticLocation = new LatLng(lattitude, longitude);
-        Marker mRunstaticMarker = mMap.addMarker(new MarkerOptions()
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-                .position(mRunstaticLocation)
-                .title(distanceCount+"m Completed")
-                .snippet("Distance - "+distanceCount
-                            +" Time - "+mTime));
-
 
     }
 
@@ -896,7 +952,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onKeyMoved(String key, GeoLocation location) {
-                Log.e("onKeyMoved","-"+key+"--"+location.latitude+"--"+location.latitude);
+                Log.e("onKeyMoved","-"+key+"--"+location.latitude+"--"+location.longitude);
 
             }
 
@@ -1159,6 +1215,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mStopwatch.setVisibility(View.GONE);
         mEndActivity.setVisibility(View.GONE);
 
+        stopService();
+
         Toast.makeText(MapsActivity.this, "Logout", Toast.LENGTH_SHORT).show();
         FirebaseAuth.getInstance().signOut();
         startActivity(new Intent(MapsActivity.this, LoginActivity.class));
@@ -1172,6 +1230,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mStopwatch.setVisibility(View.GONE);
 
         runtastic = false;
+        userID = null;
 
         mMap.clear();   //Clear and set up map again
         MyLocationMarker = null;
@@ -1191,6 +1250,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        userID = null;
         mMap.clear();   //Clear and set up map again
         MyLocationMarker = null;
         addMyLocationMarker();
@@ -1204,6 +1264,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mStopwatch.setVisibility(View.GONE);
         mEndActivity.setVisibility(View.GONE);
         runtastic = false;
+        userID = null;
 
         mMap.clear();    //Clear and set up map again
         MyLocationMarker = null;

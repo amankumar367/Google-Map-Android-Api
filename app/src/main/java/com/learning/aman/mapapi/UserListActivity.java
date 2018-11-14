@@ -75,7 +75,7 @@ public class UserListActivity extends AppCompatActivity {
                                 Toast.makeText(UserListActivity.this, "Namr = "+model.getName(), Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(UserListActivity.this, MapsActivity.class);
                                 intent.putExtra("UID", uid);
-                                    startActivity(intent);
+                                startActivity(intent);
                                 finish();
                             }
                         });

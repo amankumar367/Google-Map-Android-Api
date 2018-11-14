@@ -80,6 +80,7 @@ public class RegisterActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task) {
 
                             if(task.isSuccessful()){
+                                Toast.makeText(RegisterActivity.this, "Creating Account Successfull", Toast.LENGTH_SHORT).show();
                                 startActivity(new Intent(RegisterActivity.this, MapsActivity.class));
                                 finish();
                             }

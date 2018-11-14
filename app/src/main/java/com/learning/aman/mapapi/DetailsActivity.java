@@ -14,6 +14,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +27,9 @@ public class DetailsActivity extends AppCompatActivity {
 
     private TextView mTotalDistance, mTotalTime, mAverageSpeed;
     private String totalDistance, totalTime;
-    private double mAvgSpeed = 0;
+    private double mAvgSpeed = 0, totaldistance = 0;
+
+    private static DecimalFormat decimalFormat = new DecimalFormat("##.##");
 
     private static final String TAG = "DetailsActivity";
        @Override
@@ -45,8 +48,8 @@ public class DetailsActivity extends AppCompatActivity {
            totalDistance = getIntent().getStringExtra("Distacne");
            totalTime = getIntent().getStringExtra("Time");
            Log.e(TAG, totalDistance+" - totalDistance | totalTime - "+totalTime);
-
-           mTotalDistance.setText(String.valueOf(Double.parseDouble(totalDistance) / 1000));
+           totaldistance = Double.parseDouble(totalDistance) / 1000;
+           mTotalDistance.setText(String.valueOf(decimalFormat.format(totaldistance)+" Km"));
            mTotalTime.setText(totalTime);
 
            try
@@ -63,7 +66,7 @@ public class DetailsActivity extends AppCompatActivity {
                Log.e(TAG, mAvgSpeed+" - AvgSpeed");
 
 
-               mAverageSpeed.setText(String.valueOf(mAvgSpeed+" Km/h"));
+               mAverageSpeed.setText(String.valueOf(decimalFormat.format(mAvgSpeed)+" Km/h"));
 
                Log.e(TAG,"Time In SEC - "+mills/1000);
            }
