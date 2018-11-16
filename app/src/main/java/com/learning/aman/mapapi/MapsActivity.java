@@ -6,6 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Criteria;
+import android.location.GpsSatellite;
+import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -129,7 +132,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView mDistance, mTime;
     private LinearLayout runtasticLayout, mStopwatch;
     private String userID, uid, distance, duration, mainTime;
-    private boolean polyLine = false, runtastic = false, timer = false, setTimeDistanceMarker = true;
+    private boolean polyLine = true, runtastic = false, timer = false, setTimeDistanceMarker = true;
 
     //Instaces for Stopwatch
     private Chronometer chronometer;
@@ -247,11 +250,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void startLocationUpdates() {
         Log.e(TAG,"startLocationUpdates");
 
+//        criteria = new Criteria();
+//        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+//        criteria.setPowerRequirement(Criteria.POWER_HIGH);
+
         // Create the location request to start receiving updates
         mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setInterval(UPDATE_INTERVAL);
         mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+
+
 
         // Create LocationSettingsRequest object using location request
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
@@ -292,6 +301,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         // GPS location can be null if GPS is switched off
                         if (location != null) {
                             Log.i(TAG,"getLastLocation");
+//                            do{
+//                                onLocationChanged(location);
+//                                Toast.makeText(MapsActivity.this, location.getTime()+"\nLocation onTime\n"+System.currentTimeMillis(), Toast.LENGTH_SHORT).show();
+//                                Log.e(TAG, "Location onTime" );
+//
+//                            }while ( System.currentTimeMillis() - location.getTime() < 5000 );
                             onLocationChanged(location);
                         }
                     }
@@ -371,9 +386,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void onLocationChanged(Location location) {
-//        int x = 10;
-        Log.i(TAG,"onLocationChanged");
+//        Log.i(TAG,"onLocationChanged");
         MyLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        Log.e(TAG, "onLocationChanged: "+location.getAccuracy() );
 
         if (MyLocation != null) {
             addMyLocationMarker();
@@ -419,7 +434,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     if(timeAtZDistance != null){
 //                        Toast.makeText(this, "Time Required For  Exact Point - "+timeAtZDistance, Toast.LENGTH_SHORT).show();
-                        setTimeDistanceMarker(timeAtZDistance, afterwardDistance, lat, lng);
+                        setTimeDistanceMarker(timeAtZDistance, z[j - 1], lat, lng);
 
                     }
 
@@ -525,6 +540,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 new DialogInterface.OnClickListener(){
                     public void onClick(DialogInterface dialog, int id){
                         dialog.cancel();
+                        finish();
                     }
                 });
         AlertDialog alert = alertDialogBuilder.create();
@@ -597,8 +613,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 j = 1;
                 stopTime = 0;
                 distanceCount = 0;
-                timer = true;
-                runtastic = true;
+                timer = false;
+                runtastic = false;
 
                 mMap.clear();   //Clear and set up map again
                 MyLocationMarker = null;
@@ -614,7 +630,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 j = 1;
                 timePicker();
-                setTimeDistanceMarker(mainTime, distanceCount, String.valueOf(MyLocation.latitude), String.valueOf(MyLocation.longitude));
+                if(runtastic){
+                    setTimeDistanceMarker(mainTime, distanceCount, String.valueOf(MyLocation.latitude), String.valueOf(MyLocation.longitude));
+                }
 //                Log.e(TAG, "totalTime - "+mainTime);
 
 
@@ -890,7 +908,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Location locationB = new Location("Point B");
                 locationB.setLatitude(MyLastLocation.latitude);
                 locationB.setLongitude(MyLastLocation.longitude);
-                polyLine = true;
+                polyLine = false;
                 lastLocation = new LatLng(myLocation.latitude, myLocation.longitude);
                 distanceCount = (int) (distanceCount + locationA.distanceTo(locationB));
 
@@ -1140,6 +1158,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStart() {
         super.onStart();
 
+        //Checking whether GPS is enabled or not
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+//            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyLocation, 18.5f));
+            Log.e(TAG, "GPS is enabled" );
+        }else{
+            showGPSDisabledAlertToUser();
+        }
+
         uid = mAuth.getCurrentUser().getUid();
         mGeoFire = new GeoFire(myDatabase.child("Locations").child(uid));
 
@@ -1245,7 +1272,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mStartActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                runtastic = true;
                 stopWatch();
             }
         });
