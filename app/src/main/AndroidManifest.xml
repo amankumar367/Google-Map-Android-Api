@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.learning.aman.mapapi">
 
     <!--
@@ -13,12 +14,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -51,7 +52,7 @@
         <activity
             android:name=".UserListActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".DetailsActivity"></activity>
+        <activity android:name=".DetailsActivity"/>
 
         <service android:name=".service.TraceService" />
     </application>

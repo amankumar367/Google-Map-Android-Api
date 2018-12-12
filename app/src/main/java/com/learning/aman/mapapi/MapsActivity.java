@@ -170,49 +170,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             z[i] = x * i;
             Log.e(TAG, i+" - Index | Value - "+z[i]);
         }
-//        try
-//        {
-//            SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
-//            Date Date1 = format.parse("00:11:24");
-//            Date Date2 = format.parse("00:01:47");
-//
-//            long millse = Date1.getTime() - Date2.getTime();
-//            long mills = Math.abs(millse);
-//
-//
-//            int h = (int) (mills/(1000 * 60 * 60));
-//            int m = (int) (mills/(1000*60)) % 60;
-//            long s = (int) (mills / 1000) % 60;
-//
-//            String hh = h < 10 ? "0"+h: h+"";
-//            String mm = m < 10 ? "0"+m: m+"";
-//            String ss = s < 10 ? "0"+s: s+"";
-//
-//
-//
-//            String diff = hh+":"+mm+":"+ss;
-//            Log.e(TAG,"mills - "+mills/1000+"\nmillse - "+millse/1000+"\nDiff - "+diff);
-//
-//            try{
-//                SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
-//                Date d = df.parse(diff);
-//                Calendar cal = Calendar.getInstance();
-//                cal.set(Calendar.HOUR_OF_DAY, d.getHours());
-//                cal.setTime(d);
-//                cal.add(Calendar.SECOND, 10);
-//                String newTime = df.format(cal.getTime());
-//
-//                Log.e(TAG,"addTimeToPrevious TEST - "+newTime);
-//
-//
-//            }catch (Exception e){
-//
-//            }
-//        }
-//        catch (Exception e)
-//        {
-//
-//        }
 
     }
 
@@ -250,17 +207,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void startLocationUpdates() {
         Log.e(TAG,"startLocationUpdates");
 
-//        criteria = new Criteria();
-//        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-//        criteria.setPowerRequirement(Criteria.POWER_HIGH);
 
         // Create the location request to start receiving updates
         mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setInterval(UPDATE_INTERVAL);
         mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-
-
 
         // Create LocationSettingsRequest object using location request
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
@@ -301,12 +253,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         // GPS location can be null if GPS is switched off
                         if (location != null) {
                             Log.i(TAG,"getLastLocation");
-//                            do{
-//                                onLocationChanged(location);
-//                                Toast.makeText(MapsActivity.this, location.getTime()+"\nLocation onTime\n"+System.currentTimeMillis(), Toast.LENGTH_SHORT).show();
-//                                Log.e(TAG, "Location onTime" );
-//
-//                            }while ( System.currentTimeMillis() - location.getTime() < 5000 );
                             onLocationChanged(location);
                         }
                     }
@@ -333,20 +279,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     String longitude = dataSnapshot.child("1").getValue().toString();
                     Log.e(TAG,latitude+" --- "+longitude);
 
-                    for (DataSnapshot child: dataSnapshot.getChildren()) {
-                        String key = child.getKey().toString();  // Key Fatch User Lat & Long from Firebase Structure
-                        String value = child.getValue().toString();
+                    lat = Double.parseDouble(latitude);
+                    lng = Double.parseDouble(longitude);
 
-                        Log.e("Data2",key+" = "+value);
-                        if(key.equals("0")) {
-                                        Log.e("Data3","Lat = "+value);
-                            lat = Double.parseDouble(value);
-                        }
-                        if(key.equals("1")) {
-                                        Log.e("Data3","Long = "+value);
-                            lng = Double.parseDouble(value);
-                        }
-                    }
                     mUserLocation = new LatLng(lat,lng);
                     if(MyLocation != null){
                         addUserLocationMarker(MyLocation, mUserLocation);
@@ -410,13 +345,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if(pickUpExactTimeDistance(z[j])){
                     pickUpApproxAfterTimeDistance(z[j]);
                 }
-//                Toast.makeText(this, j+" - J \n"
-//                        +previousDistance +" - previousDistance \n"
-//                        +previousTime+" - previousTime \n"
-//                        +afterwardDistance+" - afterwardDistance \n"
-//                        +afterwardTime+" - afterwardTime \n"
-//                        +leftDistance+" - leftDistance\n"
-//                        +distanceCount+" - distanceCount", Toast.LENGTH_SHORT).show();
 
                 Log.e(TAG,j+" - J \n"
                         +previousDistance +" - previousDistance \n"
@@ -429,8 +357,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if(afterwardDistance != 0 && afterwardTime != null){
                     distanceDifference = afterwardDistance - previousDistance;
 
-                    timeForLeftDistance = ( findTimeDifference(previousTime, afterwardTime) * leftDistance) / distanceDifference;
-                    timeAtZDistance = addTimeToPrevious(previousTime, timeForLeftDistance);
+                    if(previousDistance != 0 && previousTime != null){
+                        timeForLeftDistance = ( findTimeDifference(previousTime, afterwardTime) * leftDistance) / distanceDifference;
+                        timeAtZDistance = addTimeToPrevious(previousTime, timeForLeftDistance);
+                    }
+                    else {
+                        timeAtZDistance = afterwardTime;
+                    }
 
                     if(timeAtZDistance != null){
 //                        Toast.makeText(this, "Time Required For  Exact Point - "+timeAtZDistance, Toast.LENGTH_SHORT).show();
@@ -564,7 +497,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 runtastic = true;
 
                 uniqueID = UUID.randomUUID().toString();
-                previousTime = "00:00:00";
+
 //                setTimeDistanceMarker(previousTime, z[0], String.valueOf(MyLocation.latitude), String.valueOf(MyLocation.longitude));
 
                 startBtn.setVisibility(View.GONE);
@@ -583,24 +516,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 timer = false;
                 runtastic = false;
 
-//                long time = SystemClock.elapsedRealtime() - chronometer.getBase();
-//                chronometer.stop();
-//                int h   = (int)(time /3600000);
-//                int m = (int)(time - h*3600000)/60000;
-//                int s= (int)(time - h*3600000- m*60000)/1000 ;
-//                String hh = h < 10 ? "0"+h: h+"";
-//                String mm = m < 10 ? "0"+m: m+"";
-//                String ss = s < 10 ? "0"+s: s+"";
-//                mainTime = hh+":"+mm+":"+ss;
-//                if(chronometer.getText().toString().equals("00:05")){
-//
-//                    Toast.makeText(MapsActivity.this, "chronometer", Toast.LENGTH_SHORT).show();
-//
-//                }
-//                if(distanceCount > 1) {
-//
-//                    Toast.makeText(MapsActivity.this, distanceCount + " - Distance | pauseBtn | Time - " + mainTime, Toast.LENGTH_SHORT).show();
-//                }
             }
         });
 
@@ -613,7 +528,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 j = 1;
                 stopTime = 0;
                 distanceCount = 0;
-                timer = false;
                 runtastic = false;
 
                 mMap.clear();   //Clear and set up map again
@@ -633,8 +547,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if(runtastic){
                     setTimeDistanceMarker(mainTime, distanceCount, String.valueOf(MyLocation.latitude), String.valueOf(MyLocation.longitude));
                 }
-//                Log.e(TAG, "totalTime - "+mainTime);
-
 
                 Intent mEndAcitvityIntent = new Intent(MapsActivity.this, DetailsActivity.class);
                 mEndAcitvityIntent.putExtra("Distacne", String.valueOf(distanceCount));
@@ -656,8 +568,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 stopTime = 0;
                 distanceCount = 0;
                 mDistance.setText(String.valueOf(distanceCount));
-//                Toast.makeText(MapsActivity.this, "Wait", Toast.LENGTH_SHORT).show();
-//                startActivity(new Intent(MapsActivity.this, DetailsActivity.class));
             }
         });
     }
@@ -710,27 +620,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     leftDistance = i - distanceCount;
                 }
             }
-        }else {
-//            if(z[j] < distanceCount && z[j + 1] > distanceCount){
-//                previousDistance = distanceCount;
-//                timePicker();
-//                previousTime = mainTime;
-//                leftDistance = z[j + 1] - distanceCount;
-//            }
-//            if(z[j + 1] < distanceCount && z[j + 2] > distanceCount){
-//                previousDistance = distanceCount;
-//                timePicker();
-//                previousTime = mainTime;
-//                leftDistance = z[j + 2] - distanceCount;
-//            }
-//            if(z[j + 2] < distanceCount && z[j + 3] > distanceCount){
-//                previousDistance = distanceCount;
-//                timePicker();
-//                previousTime = mainTime;
-//                leftDistance = z[j + 3] - distanceCount;
-//            }
         }
-    }
+        }
 
     private void pickUpApproxAfterTimeDistance(int i){
         int fivePercentOfZ , tenPercentOfZ , twelvePercentOfZ ;
@@ -766,22 +657,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             lng = String.valueOf(MyLocation.longitude);
 
             j++;
-        }else{
-//            if((z[j] < distanceCount) && (z[j + 1] > distanceCount)){
-//                j = j + 1;
-//            }
-//            if((z[j + 1] < distanceCount) && (z[j + 2] > distanceCount)){
-//                j = j + 2;
-//            }
-//            if((z[j + 2] < distanceCount) && (z[j + 3] > distanceCount)){
-//                j = j + 3;
-//            }
         }
-
     }
 
     private void timePicker() {
         if(timer){
+
             long time = SystemClock.elapsedRealtime() - chronometer.getBase();
             int h   = (int)(time /3600000);
             int m = (int)(time - h*3600000)/60000;
@@ -791,20 +672,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             String ss = s < 10 ? "0"+s: s+"";
             mainTime = hh+":"+mm+":"+ss;
 
-//            Toast.makeText(MapsActivity.this, distanceCount + " - Distance | Time Picker | Time - " + mainTime, Toast.LENGTH_LONG).show();
-//            arrayList = new ArrayList<HashMap<String,String>>();
-//
-//            HashMap<String, String> h1 = new HashMap<String, String>();
-//
-//
-//            h1.put("h1_key_1", String.valueOf(distanceCount));
-//            h1.put("h1_key_2", "h1_value_2");
-//            arrayList.add(h1);
-//
-//            HashMap<String, String> h2 = new HashMap<String, String>();
-//            h2.put("h2_key_1", "h2_value_1");
-//            h2.put("h2_key_2", "h2_value_2");
-//            arrayList.add(h2);
         }
     }
 
@@ -827,8 +694,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             String hh = h < 10 ? "0"+h: h+"";
             String mm = m < 10 ? "0"+m: m+"";
             String ss = s < 10 ? "0"+s: s+"";
-
-
 
             String diff = hh+":"+mm+":"+ss;
 //            Log.e(TAG,"mills - "+mills/1000+"\nmillse - "+millse/1000+"\nDiff - "+diff);
@@ -882,7 +747,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     Toast.makeText(MapsActivity.this, "Distance - "+distanceCount+"\nTime - "+mainTime+"\nMyLocation -" +MyLocation, Toast.LENGTH_SHORT).show();
                     previousDistance = 0;
-                    previousTime = "00:00:00";
+                    previousTime = null;
                     afterwardDistance = 0;
                     afterwardTime = null;
                     leftDistance = 0;
@@ -948,12 +813,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
 
     private void myQueries() {
-//        mMap.addCircle(new CircleOptions()
-//                .center(MyLocation)
-//                .radius(2 * 1000) //2000 m
-//                .strokeColor(Color.LTGRAY)
-////                .fillColor(0x40808080)
-//                .strokeWidth(5.0f));
 
         GeoQuery geoQuery = mGeoFire.queryAtLocation(new GeoLocation(MyLocation.latitude, MyLocation.longitude), 0.5f);
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
