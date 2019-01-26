@@ -47,5 +47,8 @@ dependencies {
     //location and map
     implementation "com.google.android.gms:play-services-location:15.0.1"
 
+    //Design
+    implementation 'com.android.support:design:28.0.0'
+
 }
 apply plugin: 'com.google.gms.google-services'

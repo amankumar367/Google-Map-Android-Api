@@ -1,4 +1,4 @@
-package com.learning.aman.mapapi;
+package com.learning.aman.mapapi.activity;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -17,6 +17,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.learning.aman.mapapi.MapsActivity;
+import com.learning.aman.mapapi.R;
 
 import java.util.HashMap;
 

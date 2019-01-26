@@ -1,4 +1,4 @@
-package com.learning.aman.mapapi;
+package com.learning.aman.mapapi.activity;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -13,12 +13,11 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.PriorityQueue;
+import com.learning.aman.mapapi.MapsActivity;
+import com.learning.aman.mapapi.R;
 
 public class LoginActivity extends AppCompatActivity {
 

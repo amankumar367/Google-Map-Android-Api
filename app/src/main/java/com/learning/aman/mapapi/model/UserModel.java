@@ -1,4 +1,4 @@
-package com.learning.aman.mapapi;
+package com.learning.aman.mapapi.model;
 
 public class UserModel {
     private String name;

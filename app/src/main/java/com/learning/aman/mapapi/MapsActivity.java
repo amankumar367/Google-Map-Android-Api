@@ -6,9 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Criteria;
-import android.location.GpsSatellite;
-import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -69,6 +66,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.learning.aman.mapapi.PrefrenceManager.PrefManager;
+import com.learning.aman.mapapi.activity.DetailsActivity;
+import com.learning.aman.mapapi.activity.LoginActivity;
+import com.learning.aman.mapapi.activity.UserListActivity;
 import com.learning.aman.mapapi.interfaces.LatLngInterpolator;
 import com.learning.aman.mapapi.service.TraceService;
 
@@ -87,14 +87,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "MapsActivity";
 
-    //These are map related Instances
     private LocationRequest mLocationRequest;
     private static final int REQUEST_FINE_LOCATION = 100;
     private long UPDATE_INTERVAL = 10 * 1000;  /* 10 secs */
@@ -151,20 +149,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        prefManager = new PrefManager(this);
-        //init() & setUpNavigationDrawer() use for make drawer and Listner on menu Select
         init();
         setUpNavigationDrawer();
 
-        mGPSLocation = (ImageView) findViewById(R.id.locateMe);
-        mDistance = findViewById(R.id.runtastic_distance);
-        runtasticLayout = findViewById(R.id.runtastic);
-        mStopwatch = findViewById(R.id.stopwatch);
-        mStartActivity = findViewById(R.id.runtastic_startMainActivity);
-        mEndActivity = findViewById(R.id.runtastic_endMainActivity);
-        startBtn = findViewById(R.id.runtastic_startActivity);
-        pauseBtn = findViewById(R.id.runtastic_pauseActivity);
-        resetBtn = findViewById(R.id.runtastic_resetActivity);
+
 
         for(int i = 1; i <= k ; i++){
             z[i] = x * i;
@@ -1029,6 +1017,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         uid = mAuth.getCurrentUser().getUid();
         mGeoFire = new GeoFire(myDatabase.child("Locations").child(uid));
 
+        prefManager = new PrefManager(MapsActivity.this);
         prefManager.setCurrentUser(uid);
 
         userID = getIntent().getStringExtra("UID");
@@ -1045,6 +1034,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void init() {
         drawerLayout = findViewById(R.id.drower);
         toolbar = findViewById(R.id.toolbar_base);
+        mGPSLocation = findViewById(R.id.locateMe);
+        mDistance = findViewById(R.id.runtastic_distance);
+        runtasticLayout = findViewById(R.id.runtastic);
+        mStopwatch = findViewById(R.id.stopwatch);
+        mStartActivity = findViewById(R.id.runtastic_startMainActivity);
+        mEndActivity = findViewById(R.id.runtastic_endMainActivity);
+        startBtn = findViewById(R.id.runtastic_startActivity);
+        pauseBtn = findViewById(R.id.runtastic_pauseActivity);
+        resetBtn = findViewById(R.id.runtastic_resetActivity);
         setSupportActionBar(toolbar);
     }
 

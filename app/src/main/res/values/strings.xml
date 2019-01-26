@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MAPAPI</string>
+    <string name="app_name">Locator</string>
     <string name="title_activity_maps">Map</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>

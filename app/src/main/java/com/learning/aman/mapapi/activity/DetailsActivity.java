@@ -1,23 +1,16 @@
-package com.learning.aman.mapapi;
+package com.learning.aman.mapapi.activity;
 
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.TextView;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
+import com.learning.aman.mapapi.R;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 
 public class DetailsActivity extends AppCompatActivity {
@@ -37,13 +30,9 @@ public class DetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
-//           mUserDetails = (RecyclerView) findViewById(R.id.user_recyclerView);
-//           mUserDetails.setHasFixedSize(true);
-//           mUserDetails.setLayoutManager(new LinearLayoutManager(this));
-
-           mTotalDistance = (TextView) findViewById(R.id.totalDistance);
-           mTotalTime = (TextView) findViewById(R.id.totalTime);
-           mAverageSpeed = (TextView) findViewById(R.id.avgSpeed);
+           mTotalDistance = findViewById(R.id.totalDistance);
+           mTotalTime = findViewById(R.id.totalTime);
+           mAverageSpeed = findViewById(R.id.avgSpeed);
 
            totalDistance = getIntent().getStringExtra("Distacne");
            totalTime = getIntent().getStringExtra("Time");
