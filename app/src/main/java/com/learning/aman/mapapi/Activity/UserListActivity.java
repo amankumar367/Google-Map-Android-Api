@@ -1,4 +1,4 @@
-package com.learning.aman.mapapi.activity;
+package com.learning.aman.mapapi.Activity;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -20,7 +20,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.learning.aman.mapapi.MapsActivity;
 import com.learning.aman.mapapi.R;
-import com.learning.aman.mapapi.model.UserModel;
+import com.learning.aman.mapapi.Model.User;
 
 public class UserListActivity extends AppCompatActivity {
 
@@ -48,12 +48,12 @@ public class UserListActivity extends AppCompatActivity {
 
         Query query = mDatabase.orderByChild("name");
 
-        FirebaseRecyclerOptions<UserModel> firebaseRecyclerOptions = new FirebaseRecyclerOptions.Builder<UserModel>()
-                .setQuery(query, UserModel.class)
+        FirebaseRecyclerOptions<User> firebaseRecyclerOptions = new FirebaseRecyclerOptions.Builder<User>()
+                .setQuery(query, User.class)
                 .build();
 
-        FirebaseRecyclerAdapter<UserModel, UserModelViewHolder> firebaseRecyclerAdapter =
-                new FirebaseRecyclerAdapter<UserModel, UserModelViewHolder>(firebaseRecyclerOptions) {
+        FirebaseRecyclerAdapter<User, UserModelViewHolder> firebaseRecyclerAdapter =
+                new FirebaseRecyclerAdapter<User, UserModelViewHolder>(firebaseRecyclerOptions) {
 
                     @NonNull
                     @Override
@@ -64,7 +64,7 @@ public class UserListActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    protected void onBindViewHolder(@NonNull UserModelViewHolder holder, final int position, @NonNull final UserModel model) {
+                    protected void onBindViewHolder(@NonNull UserModelViewHolder holder, final int position, @NonNull final User model) {
 
                         holder.setName(model.getName());
 

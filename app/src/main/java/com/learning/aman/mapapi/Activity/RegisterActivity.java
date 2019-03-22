@@ -1,5 +1,6 @@
-package com.learning.aman.mapapi.activity;
+package com.learning.aman.mapapi.Activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private EditText mName, mEmail, mPassword;
     private Button mSubmit;
+    private ProgressDialog mProgressBar;
 
     //Firebase Auth
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -37,11 +39,19 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        init();
+        onClick();
+
+    }
+
+    private void init() {
         mName = findViewById(R.id.name);
         mEmail = findViewById(R.id.regEmail);
         mPassword =  findViewById(R.id.regPassword);
-        mSubmit = (Button) findViewById(R.id.regButton);
+        mSubmit = findViewById(R.id.regButton);
+    }
 
+    private void onClick() {
         mSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -51,11 +61,14 @@ public class RegisterActivity extends AppCompatActivity {
                 String password = mPassword.getText().toString();
 
                 if(!TextUtils.isEmpty(name) && !TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)){
-
+                    mProgressBar = new ProgressDialog(RegisterActivity.this);
+                    mProgressBar.setMessage("Registering....");
+                    mProgressBar.setCanceledOnTouchOutside(false);
+                    mProgressBar.show();
                     register(name, email, password);
 
                 }else {
-                    Toast.makeText(RegisterActivity.this, "Enter Vaild Fills", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "Enter Vaild email and password", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -85,6 +98,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 Toast.makeText(RegisterActivity.this, "Creating Account Successfull", Toast.LENGTH_SHORT).show();
                                 startActivity(new Intent(RegisterActivity.this, MapsActivity.class));
                                 finish();
+                                mProgressBar.dismiss();
                             }
                         }
                     });

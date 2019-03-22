@@ -5,4 +5,14 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="key">AIzaSyC-R1hQiDTNL-KrBLVxii1Di5riIpQLh-8</string>
+
+    //Runtastic Strings
+    <string name="start_live">Start   Live\nRunning</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="reset">Reset</string>
+    <string name="stop">Stop</string>
+    <string name="duration">Duration</string>
+    <string name="distance">Distance (meter)</string>
+    <string name="distance_value">00.00</string>
 </resources>

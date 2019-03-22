@@ -1,14 +1,14 @@
-package com.learning.aman.mapapi.model;
+package com.learning.aman.mapapi.Model;
 
-public class UserModel {
+public class User {
     private String name;
     private String email;
 
-    public UserModel(){
+    public User(){
 
     }
 
-    public UserModel(String name, String email) {
+    public User(String name, String email) {
         this.name = name;
         this.email = email;
     }

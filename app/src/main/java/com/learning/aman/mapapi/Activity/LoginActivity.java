@@ -1,5 +1,6 @@
-package com.learning.aman.mapapi.activity;
+package com.learning.aman.mapapi.Activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText mEmail, mPassword;
     private Button mLogin, mRegister;
+    private ProgressDialog mProgressBar;
 
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
@@ -32,11 +34,19 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        init();
+        onClick();
+
+    }
+
+    private void init() {
         mEmail = findViewById(R.id.email);
         mPassword =  findViewById(R.id.password);
-        mLogin = (Button) findViewById(R.id.loginButton);
-        mRegister = (Button) findViewById(R.id.register_button);
+        mLogin = findViewById(R.id.loginButton);
+        mRegister = findViewById(R.id.register_button);
+    }
 
+    private void onClick() {
         mRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -53,6 +63,10 @@ public class LoginActivity extends AppCompatActivity {
 
                 if(!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)){
 
+                    mProgressBar = new ProgressDialog(LoginActivity.this);
+                    mProgressBar.setMessage("Logging....");
+                    mProgressBar.setCanceledOnTouchOutside(false);
+                    mProgressBar.show();
                     login(email, password);
 
                 }else {
@@ -74,6 +88,7 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
                     startActivity(intent);
+                    mProgressBar.dismiss();
                 }
                 else{
                     Log.e("login","failed");
@@ -97,10 +112,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onStart();
 
         if(FirebaseAuth.getInstance().getCurrentUser() == null){
-
             Log.e("LoginActivity","Not Logged In");
-
-
         }else {
             Log.e("LoginActivity","Already Login");
             Intent intent = new Intent(LoginActivity.this, MapsActivity.class);

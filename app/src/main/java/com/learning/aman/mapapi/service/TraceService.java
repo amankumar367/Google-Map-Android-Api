@@ -155,19 +155,6 @@ public class TraceService extends Service implements GoogleApiClient.ConnectionC
                     }
                 });
 
-//        HashMap<String, String> hashMap = new HashMap<>();
-//        hashMap.put("0", String.valueOf(location.getLatitude()));
-//        hashMap.put("1", String.valueOf(location.getLongitude()));
-//
-//
-//        mDatabase.child("Locations").child(uid).child("You").child("l").setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Void> task) {
-//                if(task.isSuccessful()){
-//                     }
-//            }
-//        });
-
     }
 
     @Override

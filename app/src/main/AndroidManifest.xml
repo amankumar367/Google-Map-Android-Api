@@ -37,7 +37,7 @@
             android:name=".MapsActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.LoginActivity"
+            android:name=".Activity.LoginActivity"
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -47,12 +47,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.RegisterActivity"
+            android:name=".Activity.RegisterActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.UserListActivity"
+            android:name=".Activity.UserListActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".activity.DetailsActivity"/>
+        <activity android:name=".Activity.DetailsActivity"/>
 
         <service android:name=".service.TraceService" />
     </application>

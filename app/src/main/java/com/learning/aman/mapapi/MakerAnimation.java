@@ -15,7 +15,7 @@ import android.view.animation.LinearInterpolator;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.learning.aman.mapapi.interfaces.LatLngInterpolator;
+import com.learning.aman.mapapi.Interfaces.LatLngInterpolator;
 
 class MarkerAnimation {
 

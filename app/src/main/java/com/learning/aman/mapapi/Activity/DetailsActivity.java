@@ -1,4 +1,4 @@
-package com.learning.aman.mapapi.activity;
+package com.learning.aman.mapapi.Activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
