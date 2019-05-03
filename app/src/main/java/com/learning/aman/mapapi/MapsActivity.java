@@ -383,7 +383,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (MyLocationMarker == null) {
             MyLocationMarker = mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.c))
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.car))
                     .position(MyLocation)
                     .title("You are here"));
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyLocation,14.5f));

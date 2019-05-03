@@ -161,7 +161,7 @@
                         android:id="@+id/locateMe"
                         android:layout_width="wrap_content"
                         android:layout_height="30dp"
-                        android:src="@drawable/gps1"
+                        android:src="@drawable/gps"
                         android:layout_gravity="center"
                         />
                 </LinearLayout>
