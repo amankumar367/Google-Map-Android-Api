@@ -92,7 +92,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final String TAG = "MapsActivity";
 
-    //These are map related Instances
+    //These are map related Instances of git
     private LocationRequest mLocationRequest;
     private static final int REQUEST_FINE_LOCATION = 100;
     private long UPDATE_INTERVAL = 10 * 1000;  /* 10 secs */
